@@ -15,7 +15,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // React URL
+    origin: "http://localhost:5173", // React URL
     credentials: true               // allow cookies (refresh token)
   })
 );
@@ -39,7 +39,7 @@ app.use(morgan("dev"));
 
 
 /* -------------------- ROUTES -------------------- */
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 // app.use("/user", userRoutes);
 // app.use("/admin", adminRoutes);
 

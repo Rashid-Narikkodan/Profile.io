@@ -1,18 +1,7 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import UserModel from "../models/user";
-import { RegisterInput, PublicUser } from "../types/user";
-
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = "15m";
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
-const REFRESH_EXPIRES_IN = "7d";
-
-const createTokens = (userId: string) => {
-  const accessToken = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-  const refreshToken = jwt.sign({ id: userId }, REFRESH_SECRET, { expiresIn: REFRESH_EXPIRES_IN });
-  return { accessToken, refreshToken };
-};
+import { RegisterInput, LoginInputs, PublicUser } from "../types/user";
+import { signAccessToken, signRefreshToken } from "../utils/jwt";
 
 // Registration Service
 export const registerUser = async (input: RegisterInput): Promise<{
@@ -26,7 +15,6 @@ export const registerUser = async (input: RegisterInput): Promise<{
   if (existing) throw new Error("Email already registered");
 
   const passwordHash = await bcrypt.hash(password, 12);
-
   const userDoc = await UserModel.create({
     name,
     email,
@@ -35,9 +23,10 @@ export const registerUser = async (input: RegisterInput): Promise<{
     role: "user",          // enforce role
     status: "active"
   });
-
-  const { accessToken, refreshToken } = createTokens(userDoc._id.toString());
-
+  
+  const accessToken= signAccessToken(userDoc._id.toString(),userDoc.role);
+  const refreshToken= signRefreshToken(userDoc._id.toString(),1);
+  console.log(accessToken, refreshToken)
   userDoc.refreshToken = refreshToken;
   await userDoc.save();
 
@@ -55,3 +44,6 @@ export const registerUser = async (input: RegisterInput): Promise<{
 
   return { user, accessToken, refreshToken };
 };
+export const loginUser=(data:LoginInputs)=>{
+
+}
